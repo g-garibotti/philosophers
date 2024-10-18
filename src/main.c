@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:23:14 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/18 00:27:32 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/18 00:50:31 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ int	main(int argc, char **argv)
 {
 	t_data	data;
 
+	if (check_args(argc, argv) != SUCCESS)
+		error_exit("Invalid arguments", &data);
 	if (init_data(&data, argc, argv) != SUCCESS)
 		error_exit("Error initializing data", &data);
 	if (create_threads(&data) != SUCCESS)

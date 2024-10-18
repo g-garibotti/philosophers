@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/18 00:27:53 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/18 00:51:06 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,9 +73,16 @@ void				check_death(t_data *data);
 
 // Cleanup and error handling
 void				cleanup_data(t_data *data);
-int					error_exit(char *message, t_data *data);
+void				error_exit(char *message, t_data *data);
 
 // Additional utility functions
 int					ft_atoi(const char *str);
+int					ft_atoi(const char *str);
+void				ft_putendl_fd(char *s, int fd);
+int					create_threads(t_data *data);
+void				check_death(t_data *data);
+int					join_threads(t_data *data);
+void				philo_sleep(t_philosopher *philo);
+void				philo_think(t_philosopher *philo);
 
 #endif

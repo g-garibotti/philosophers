@@ -6,11 +6,11 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/18 00:19:19 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/18 00:24:10 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/18 00:51:39 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philosophers.h"
+#include "../includes/philosophers.h"
 
 long long	get_time(void)
 {
@@ -57,4 +57,34 @@ int	check_meals(t_data *data)
 	if (finished_eating == data->num_philos)
 		return (SUCCESS);
 	return (ERROR);
+}
+int	ft_atoi(const char *str)
+{
+	int	result;
+	int	sign;
+
+	result = 0;
+	sign = 1;
+	while (*str == ' ' || (*str >= 9 && *str <= 13))
+		str++;
+	if (*str == '-' || *str == '+')
+	{
+		sign = (*str == '-') ? -1 : 1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+	{
+		result = result * 10 + (*str - '0');
+		str++;
+	}
+	return (sign * result);
+}
+
+void	ft_putendl_fd(char *s, int fd)
+{
+	if (!s)
+		return ;
+	while (*s)
+		write(fd, s++, 1);
+	write(fd, "\n", 1);
 }

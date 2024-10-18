@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/18 00:06:34 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/18 00:14:41 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/18 00:51:06 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int	init_philosophers(t_data *data)
 		data->philosophers[i].left_fork = i;
 		data->philosophers[i].right_fork = (i + 1) % data->num_philos;
 		data->philosophers[i].meals_eaten = 0;
-		data->philosophers[i].last_meal_time = 0;
+		data->philosophers[i].last_meal_time = get_time();
 		data->philosophers[i].data = data;
 		i++;
 	}
@@ -79,7 +79,7 @@ int	init_data(t_data *data, int argc, char **argv)
 	if (parse_args(data, argc, argv) != SUCCESS)
 		return (ERROR);
 	data->someone_died = 0;
-	data->start_time = 0;
+	data->start_time = get_time();
 	if (init_mutexes(data) != SUCCESS)
 		return (ERROR);
 	if (init_philosophers(data) != SUCCESS)

@@ -9,7 +9,12 @@ NAME = philo
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
-SRCS = src/main.c
+SRCS = src/main.c \
+		src/utils.c \
+		src/philo_actions.c \
+		src/cleanup.c \
+		src/init.c \
+		src/thread_utils.c \
 
 OBJS_DIR = objs
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)
