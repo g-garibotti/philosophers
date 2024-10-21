@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 15:21:57 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:55:56 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ struct								s_simulation_data
 	pthread_mutex_t					print_mutex;
 	pthread_t						death_checker_thread;
 	bool							death_checker_created;
+	int								finished_eating_count;
 };
 
 // Main functions

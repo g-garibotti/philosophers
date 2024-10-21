@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:50:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 14:53:35 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 15:23:41 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,16 @@ int	main(int argc, char **argv)
 	t_simulation_data	*sim_data;
 
 	if (!validate_arguments(argc, argv))
-		return (printf("Error: Invalid arguments\n"), 1);
+	{
+		printf("Error: Invalid arguments\n");
+		return (1);
+	}
 	sim_data = initialize_simulation(argc, argv);
+	if (!sim_data)
+	{
+		printf("Error: Failed to initialize simulation\n");
+		return (1);
+	}
 	if (!start_simulation(sim_data))
 	{
 		cleanup_and_exit(sim_data, "Error: Failed to start simulation\n");
