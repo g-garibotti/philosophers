@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:56:44 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:04:51 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 13:10:02 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ static bool	init_philosophers(t_simulation_data *sim_data)
 			% sim_data->num_of_philos;
 		sim_data->philosophers[i].eat_count = 0;
 		sim_data->philosophers[i].last_meal_time = 0;
+		sim_data->philosophers[i].sim_data = sim_data;
 		i++;
 	}
 	return (true);
