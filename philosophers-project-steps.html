@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophers Project: Step-by-Step Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        h2 {
+            color: #0066cc;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ Philosophers Project: Step-by-Step Guide</h1>
+
+        <div class="section">
+            <h2>1. 🛠️ Project Setup</h2>
+            <ul>
+                <li><input type="checkbox" id="setup1"> Create project directory structure</li>
+                <li><input type="checkbox" id="setup2"> Initialize Git repository</li>
+                <li><input type="checkbox" id="setup3"> Create Makefile with required rules (NAME, all, clean, fclean, re)</li>
+                <li><input type="checkbox" id="setup4"> Set up error handling and utility functions</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. 🧱 Core Data Structures</h2>
+            <ul>
+                <li><input type="checkbox" id="struct1"> Define philosopher struct (id, time_last_meal, eat_count, etc.)</li>
+                <li><input type="checkbox" id="struct2"> Create simulation struct (philosophers, forks, simulation parameters)</li>
+                <li><input type="checkbox" id="struct3"> Implement functions to initialize and destroy these structures</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>3. 🧵 Threading Foundations</h2>
+            <ul>
+                <li><input type="checkbox" id="thread1"> Implement functions for thread creation and joining</li>
+                <li><input type="checkbox" id="thread2"> Create mutex initialization and destruction functions</li>
+                <li><input type="checkbox" id="thread3"> Set up basic thread-safe logging function</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>4. ⏱️ Time Management</h2>
+            <ul>
+                <li><input type="checkbox" id="time1"> Implement function to get current timestamp in milliseconds</li>
+                <li><input type="checkbox" id="time2"> Create precise sleep function (usleep wrapper)</li>
+                <li><input type="checkbox" id="time3"> Set up time difference calculation function</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>5. 🍽️ Philosopher Actions</h2>
+            <ul>
+                <li><input type="checkbox" id="action1"> Implement eating function (pick up forks, eat, put down forks)</li>
+                <li><input type="checkbox" id="action2"> Create sleeping function</li>
+                <li><input type="checkbox" id="action3"> Set up thinking function</li>
+                <li><input type="checkbox" id="action4"> Implement death checking logic</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>6. 🔄 Main Simulation Loop</h2>
+            <ul>
+                <li><input type="checkbox" id="sim1"> Create main philosopher routine</li>
+                <li><input type="checkbox" id="sim2"> Implement simulation initialization (create threads for each philosopher)</li>
+                <li><input type="checkbox" id="sim3"> Set up monitoring thread for death checks</li>
+                <li><input type="checkbox" id="sim4"> Handle simulation end conditions</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>7. 🔢 Input Parsing and Validation</h2>
+            <ul>
+                <li><input type="checkbox" id="input1"> Implement argument parsing (number_of_philosophers, time_to_die, time_to_eat, time_to_sleep, [number_of_times_each_philosopher_must_eat])</li>
+                <li><input type="checkbox" id="input2"> Add input validation and error handling</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>8. 🧹 Resource Management</h2>
+            <ul>
+                <li><input type="checkbox" id="res1"> Implement proper thread cleanup</li>
+                <li><input type="checkbox" id="res2"> Ensure all mutexes are correctly destroyed</li>
+                <li><input type="checkbox" id="res3"> Free all allocated memory</li>
+                <li><input type="checkbox" id="res4"> Handle program termination gracefully</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>9. 🐛 Testing and Refinement</h2>
+            <ul>
+                <li><input type="checkbox" id="test1"> Implement comprehensive testing for various scenarios</li>
+                <li><input type="checkbox" id="test2"> Handle edge cases (e.g., one philosopher, very short/long times)</li>
+                <li><input type="checkbox" id="test3"> Optimize for performance and memory usage</li>
+                <li><input type="checkbox" id="test4"> Ensure there are no data races or undefined behaviors</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>10. 📝 Documentation and Submission</h2>
+            <ul>
+                <li><input type="checkbox" id="doc1"> Write clear comments in the code</li>
+                <li><input type="checkbox" id="doc2"> Create a README with project description and usage instructions</li>
+                <li><input type="checkbox" id="doc3"> Perform final code review and cleanup</li>
+                <li><input type="checkbox" id="doc4"> Prepare for submission and evaluation</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Function to save checkbox states
+        function saveCheckboxStates() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const states = {};
+            checkboxes.forEach(checkbox => {
+                states[checkbox.id] = checkbox.checked;
+            });
+            localStorage.setItem('checkboxStates', JSON.stringify(states));
+        }
+
+        // Function to load checkbox states
+        function loadCheckboxStates() {
+            const states = JSON.parse(localStorage.getItem('checkboxStates')) || {};
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                if (states[checkbox.id] !== undefined) {
+                    checkbox.checked = states[checkbox.id];
+                }
+            });
+        }
+
+        // Add event listeners to checkboxes
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCheckboxStates();
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', saveCheckboxStates);
+            });
+        });
+    </script>
+</body>
+</html>

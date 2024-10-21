@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/18 00:51:06 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/19 10:02:02 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ typedef struct s_philosopher
 	int				right_fork;
 	int				meals_eaten;
 	long long		last_meal_time;
-	struct s_data	*data;
 	pthread_t		thread;
+	struct s_data	*data;
 }					t_philosopher;
 
 typedef struct s_data
@@ -44,6 +44,7 @@ typedef struct s_data
 	long long		start_time;
 	pthread_mutex_t	*forks;
 	pthread_mutex_t	write_mutex;
+	pthread_mutex_t start_mutex; // New mutex for synchronizing start
 	t_philosopher	*philosophers;
 }					t_data;
 
@@ -53,7 +54,7 @@ int					init_mutexes(t_data *data);
 int					init_philosophers(t_data *data);
 
 // Action functions
-void				philo_eat(t_philosopher *philo);
+int					philo_eat(t_philosopher *philo);
 void				philo_sleep(t_philosopher *philo);
 void				philo_think(t_philosopher *philo);
 void				*philosopher(void *arg);
