@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:28 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 14:37:53 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:00:54 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	precise_sleep(long long ms)
 		current_time = get_current_time();
 		if (current_time - start_time >= ms)
 			break ;
-		usleep(100);
+		usleep(50);
 	}
 }
 
@@ -47,7 +47,7 @@ int	ft_strcmp(const char *s1, const char *s2)
 		s1++;
 		s2++;
 	}
-	return *(unsigned char*)s1 - *(unsigned char*)s2;
+	return (*(unsigned char *)s1 - *(unsigned char *)s2);
 }
 
 int	ft_atoi(const char *str)
