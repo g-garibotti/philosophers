@@ -6,13 +6,11 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:53:42 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:00:42 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 12:54:21 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philosophers.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 void	free_simulation_data(t_simulation_data *sim_data)
 {

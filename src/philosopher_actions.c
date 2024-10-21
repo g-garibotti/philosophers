@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:17 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:28:51 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 12:56:27 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static void	print_status(t_simulation_data *sim_data, int id, char *status)
 	pthread_mutex_unlock(&sim_data->print_mutex);
 }
 
-static bool	check_death(t_simulation_data *sim_data, t_philosopher *philo)
+bool	check_death(t_simulation_data *sim_data, t_philosopher *philo)
 {
 	pthread_mutex_lock(&sim_data->death_mutex);
 	if (sim_data->sim_stop || time_diff(philo->last_meal_time,
