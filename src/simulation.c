@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 13:29:16 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:42:44 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,24 +19,22 @@ void	*philosopher_routine(void *arg)
 
 	philo = (t_philosopher *)arg;
 	sim_data = philo->sim_data;
-	printf("Debug: Philosopher %d starting routine\n", philo->id);
-	
-	// Add a small delay to allow all threads to start
-	usleep(1000);  // 1ms delay
-
 	if (philo->id % 2 == 0)
-		precise_sleep(1);
-	while (!sim_data->sim_stop)
+		usleep(1000);
+	while (!check_death(sim_data))
 	{
 		if (!philosopher_eat(sim_data, philo))
-			break ;
+			break;
+		if (check_death(sim_data))
+			break;
 		philosopher_sleep(sim_data, philo);
+		if (check_death(sim_data))
+			break;
 		philosopher_think(sim_data, philo);
-		if (sim_data->num_times_to_eat != -1
-			&& philo->eat_count >= sim_data->num_times_to_eat)
-			break ;
+		if (sim_data->num_times_to_eat != -1 && 
+			philo->eat_count >= sim_data->num_times_to_eat)
+			break;
 	}
-	printf("Debug: Philosopher %d ending routine\n", philo->id);
 	return (NULL);
 }
 
@@ -44,59 +42,59 @@ void	*death_checker(void *arg)
 {
 	t_simulation_data	*sim_data;
 	int					i;
+	long long			time_since_last_meal;
 
 	sim_data = (t_simulation_data *)arg;
-	printf("Debug: Death checker started\n");
-	while (!sim_data->sim_stop)
+	while (!check_death(sim_data))
 	{
-		i = 0;
-		while (i < sim_data->num_of_philos && !sim_data->sim_stop)
+		i = -1;
+		while (++i < sim_data->num_of_philos)
 		{
-			if (check_death(sim_data, &sim_data->philosophers[i]))
+			pthread_mutex_lock(&sim_data->death_mutex);
+			time_since_last_meal = time_diff(sim_data->philosophers[i].last_meal_time,
+											get_current_time());
+			if (time_since_last_meal > sim_data->time_to_die)
 			{
-				printf("Debug: Philosopher %d has died\n", i + 1);
+				sim_data->sim_stop = true;
+				print_status(sim_data, sim_data->philosophers[i].id, "died");
+				pthread_mutex_unlock(&sim_data->death_mutex);
 				return (NULL);
 			}
-			i++;
+			pthread_mutex_unlock(&sim_data->death_mutex);
 		}
-		usleep(100);
+		usleep(1000);
 	}
-	printf("Debug: Death checker ending\n");
 	return (NULL);
 }
 
 bool	start_simulation(t_simulation_data *sim_data)
 {
 	int			i;
-	pthread_t	death_checker_thread;
 
-	printf("Debug: Starting simulation\n");
 	sim_data->start_time = get_current_time();
-	i = 0;
-	while (i < sim_data->num_of_philos)
+	i = -1;
+	while (++i < sim_data->num_of_philos)
 	{
-		printf("Debug: Creating thread for philosopher %d\n", i + 1);
+		sim_data->philosophers[i].last_meal_time = sim_data->start_time;
+		sim_data->philosophers[i].thread_created = false;
 		if (pthread_create(&sim_data->philosophers[i].thread, NULL,
 				philosopher_routine, &sim_data->philosophers[i]) != 0)
 		{
-			printf("Debug: Failed to create thread for philosopher %d\n", i + 1);
+			sim_data->sim_stop = true;
 			return (false);
 		}
-		i++;
+		sim_data->philosophers[i].thread_created = true;
 	}
-	printf("Debug: Creating death checker thread\n");
-	if (pthread_create(&death_checker_thread, NULL, death_checker,
-			sim_data) != 0)
+	sim_data->death_checker_created = false;
+	if (pthread_create(&sim_data->death_checker_thread, NULL, death_checker, sim_data) != 0)
 	{
-		printf("Debug: Failed to create death checker thread\n");
+		sim_data->sim_stop = true;
 		return (false);
 	}
-	printf("Debug: Waiting for threads to finish\n");
-	if (pthread_join(death_checker_thread, NULL) != 0)
-	{
-		printf("Debug: Failed to join death checker thread\n");
+	sim_data->death_checker_created = true;
+	
+	if (pthread_join(sim_data->death_checker_thread, NULL) != 0)
 		return (false);
-	}
-	printf("Debug: Death checker thread joined\n");
+	
 	return (true);
 }

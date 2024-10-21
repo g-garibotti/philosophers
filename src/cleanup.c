@@ -6,72 +6,45 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:53:42 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 13:19:47 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:46:06 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philosophers.h"
 
-void	free_simulation_data(t_simulation_data *sim_data)
-{
-	if (sim_data)
-	{
-		if (sim_data->philosophers)
-			free(sim_data->philosophers);
-		if (sim_data->forks)
-			free(sim_data->forks);
-		free(sim_data);
-	}
-}
-
 void	cleanup_resources(t_simulation_data *sim_data)
 {
 	int	i;
 
-	printf("Debug: Entering cleanup_resources\n");
-	if (sim_data->philosophers)
+	if (sim_data)
 	{
-		i = 0;
-		while (i < sim_data->num_of_philos)
+		if (sim_data->death_checker_created)
+			pthread_join(sim_data->death_checker_thread, NULL);
+		
+		if (sim_data->philosophers)
 		{
-			if (!sim_data->philosophers[i].thread_joined)
+			i = -1;
+			while (++i < sim_data->num_of_philos)
 			{
-				printf("Debug: Attempting to join thread for philosopher %d\n", i + 1);
-				if (pthread_join(sim_data->philosophers[i].thread, NULL) != 0)
-				{
-					printf("Debug: Failed to join thread for philosopher %d\n", i + 1);
-				}
-				else
-				{
-					printf("Debug: Successfully joined thread for philosopher %d\n", i + 1);
-					sim_data->philosophers[i].thread_joined = 1;
-				}
+				if (sim_data->philosophers[i].thread_created)
+					pthread_join(sim_data->philosophers[i].thread, NULL);
 			}
-			else
-			{
-				printf("Debug: Thread for philosopher %d already joined\n", i + 1);
-			}
-			i++;
+			free(sim_data->philosophers);
 		}
-	}
-	printf("Debug: Finished joining philosopher threads\n");
-
-	if (sim_data->forks)
-	{
-		i = 0;
-		while (i < sim_data->num_of_philos)
+		
+		if (sim_data->forks)
 		{
-			printf("Debug: Destroying mutex for fork %d\n", i + 1);
-			pthread_mutex_destroy(&sim_data->forks[i]);
-			i++;
+			i = -1;
+			while (++i < sim_data->num_of_philos)
+				pthread_mutex_destroy(&sim_data->forks[i]);
+			free(sim_data->forks);
 		}
+		
+		pthread_mutex_destroy(&sim_data->death_mutex);
+		pthread_mutex_destroy(&sim_data->print_mutex);
+		
+		free(sim_data);
 	}
-	printf("Debug: Destroying death and print mutexes\n");
-	pthread_mutex_destroy(&sim_data->death_mutex);
-	pthread_mutex_destroy(&sim_data->print_mutex);
-	printf("Debug: Freeing simulation data\n");
-	free_simulation_data(sim_data);
-	printf("Debug: Cleanup complete\n");
 }
 
 void	cleanup_and_exit(t_simulation_data *sim_data, char *message)

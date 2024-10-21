@@ -15,6 +15,7 @@ SRCS = src/cleanup.c \
 		src/philosophers.c \
 		src/simulation.c \
 		src/time_utils.c \
+		src/parsing.c \
 
 OBJS_DIR = objs
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)

@@ -6,74 +6,69 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:17 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 13:29:40 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 14:39:50 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philosophers.h"
 
-static void	print_status(t_simulation_data *sim_data, int id, char *status)
+void	print_status(t_simulation_data *sim_data, int id, char *status)
 {
 	pthread_mutex_lock(&sim_data->print_mutex);
-	if (!sim_data->sim_stop)
-		printf("%lld %d %s\n", get_current_time() - sim_data->start_time, id,
-			status);
+	if (!sim_data->sim_stop || status[0] == 'd')  // 'd' for "died"
+		printf("%lld %d %s\n", get_current_time() - sim_data->start_time, id, status);
 	pthread_mutex_unlock(&sim_data->print_mutex);
 }
 
-bool	check_death(t_simulation_data *sim_data, t_philosopher *philo)
+bool	check_death(t_simulation_data *sim_data)
 {
-	long long current_time = get_current_time();
-	long long time_since_last_meal = time_diff(philo->last_meal_time, current_time);
+	bool	is_dead;
 
 	pthread_mutex_lock(&sim_data->death_mutex);
-	if (sim_data->sim_stop || time_since_last_meal > sim_data->time_to_die)
-	{
-		if (!sim_data->sim_stop)
-		{
-			sim_data->sim_stop = true;
-			print_status(sim_data, philo->id, "died");
-			printf("Debug: Philosopher %d has died, time since last meal: %lld ms\n", 
-				   philo->id, time_since_last_meal);
-		}
-		pthread_mutex_unlock(&sim_data->death_mutex);
-		return (true);
-	}
+	is_dead = sim_data->sim_stop;
 	pthread_mutex_unlock(&sim_data->death_mutex);
-	return (false);
+	return (is_dead);
 }
 
 bool	philosopher_eat(t_simulation_data *sim_data, t_philosopher *philo)
 {
 	pthread_mutex_lock(&sim_data->forks[philo->left_fork]);
-	print_status(sim_data, philo->id, "has taken left fork");
-	pthread_mutex_lock(&sim_data->forks[philo->right_fork]);
-	print_status(sim_data, philo->id, "has taken right fork");
-	pthread_mutex_lock(&sim_data->death_mutex);
-	if (sim_data->sim_stop)
+	print_status(sim_data, philo->id, "has taken a fork");
+	if (check_death(sim_data))
 	{
-		pthread_mutex_unlock(&sim_data->death_mutex);
-		pthread_mutex_unlock(&sim_data->forks[philo->right_fork]);
 		pthread_mutex_unlock(&sim_data->forks[philo->left_fork]);
 		return (false);
 	}
+	pthread_mutex_lock(&sim_data->forks[philo->right_fork]);
+	print_status(sim_data, philo->id, "has taken a fork");
+	if (check_death(sim_data))
+	{
+		pthread_mutex_unlock(&sim_data->forks[philo->left_fork]);
+		pthread_mutex_unlock(&sim_data->forks[philo->right_fork]);
+		return (false);
+	}
 	print_status(sim_data, philo->id, "is eating");
+	pthread_mutex_lock(&sim_data->death_mutex);
 	philo->last_meal_time = get_current_time();
 	philo->eat_count++;
 	pthread_mutex_unlock(&sim_data->death_mutex);
 	precise_sleep(sim_data->time_to_eat);
 	pthread_mutex_unlock(&sim_data->forks[philo->right_fork]);
 	pthread_mutex_unlock(&sim_data->forks[philo->left_fork]);
-	return (!check_death(sim_data, philo));
+	return (!check_death(sim_data));
 }
 
 void	philosopher_sleep(t_simulation_data *sim_data, t_philosopher *philo)
 {
-	print_status(sim_data, philo->id, "is sleeping");
-	precise_sleep(sim_data->time_to_sleep);
+	if (!check_death(sim_data))
+	{
+		print_status(sim_data, philo->id, "is sleeping");
+		precise_sleep(sim_data->time_to_sleep);
+	}
 }
 
 void	philosopher_think(t_simulation_data *sim_data, t_philosopher *philo)
 {
-	print_status(sim_data, philo->id, "is thinking");
+	if (!check_death(sim_data))
+		print_status(sim_data, philo->id, "is thinking");
 }
