@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/19 10:02:02 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 12:30:20 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,76 +14,67 @@
 # define PHILOSOPHERS_H
 
 # include <pthread.h>
+# include <stdbool.h>
+# include <stdint.h>
 # include <stdio.h>
-# include <stdlib.h>
 # include <sys/time.h>
 # include <unistd.h>
 
-# define SUCCESS 0
-# define ERROR 1
+typedef struct s_simulation_data
+{
+	t_philosopher		*philosophers;
+	pthread_mutex_t		*forks;
+	pthread_mutex_t		death_mutex;
+	pthread_mutex_t		print_mutex;
+	bool				sim_stop;
+	int					num_of_philos;
+	int					time_to_die;
+	int					time_to_eat;
+	int					time_to_sleep;
+	int					num_times_to_eat;
+	long long			start_time;
+}						t_simulation_data;
 
 typedef struct s_philosopher
 {
-	int				id;
-	int				left_fork;
-	int				right_fork;
-	int				meals_eaten;
-	long long		last_meal_time;
-	pthread_t		thread;
-	struct s_data	*data;
-}					t_philosopher;
+	int					id;
+	int					left_fork;
+	int					right_fork;
+	int					eat_count;
+	long long			last_meal_time;
+	pthread_t			thread;
+	t_simulation_data	*sim_data;
+}						t_philosopher;
 
-typedef struct s_data
-{
-	int				num_philos;
-	int				time_to_die;
-	int				time_to_eat;
-	int				time_to_sleep;
-	int				meals_to_eat;
-	int				someone_died;
-	long long		start_time;
-	pthread_mutex_t	*forks;
-	pthread_mutex_t	write_mutex;
-	pthread_mutex_t start_mutex; // New mutex for synchronizing start
-	t_philosopher	*philosophers;
-}					t_data;
+// Main functions
+bool					validate_arguments(int argc, char **argv);
+t_simulation_data		*initialize_simulation(int argc, char **argv);
 
-// Init functions
-int					init_data(t_data *data, int argc, char **argv);
-int					init_mutexes(t_data *data);
-int					init_philosophers(t_data *data);
+// Cleanup functions
+void					cleanup_and_exit(t_simulation_data *sim_data,
+							char *message);
+void					cleanup_resources(t_simulation_data *sim_data);
+void					free_simulation_data(t_simulation_data *sim_data);
 
-// Action functions
-int					philo_eat(t_philosopher *philo);
-void				philo_sleep(t_philosopher *philo);
-void				philo_think(t_philosopher *philo);
-void				*philosopher(void *arg);
+// Initialization functions
+bool					init_simulation(t_simulation_data *sim_data);
 
-// Utility functions
-long long			get_time(void);
-void				smart_sleep(long long time, t_data *data);
-void				print_status(t_data *data, int id, char *status);
-int					check_meals(t_data *data);
+// Time utils functions
+long long				get_current_time(void);
+void					precise_sleep(long long ms);
+long long				time_diff(long long past, long long present);
 
-// Thread functions
-int					create_threads(t_data *data);
-int					join_threads(t_data *data);
+// Philosopher actions
+bool					philosopher_eat(t_simulation_data *sim_data,
+							t_philosopher *philo);
+void					philosopher_sleep(t_simulation_data *sim_data,
+							t_philosopher *philo);
+void					philosopher_think(t_simulation_data *sim_data,
+							t_philosopher *philo);
 
-// Monitoring function
-void				check_death(t_data *data);
-
-// Cleanup and error handling
-void				cleanup_data(t_data *data);
-void				error_exit(char *message, t_data *data);
-
-// Additional utility functions
-int					ft_atoi(const char *str);
-int					ft_atoi(const char *str);
-void				ft_putendl_fd(char *s, int fd);
-int					create_threads(t_data *data);
-void				check_death(t_data *data);
-int					join_threads(t_data *data);
-void				philo_sleep(t_philosopher *philo);
-void				philo_think(t_philosopher *philo);
+// Simulation functions
+bool					start_simulation(t_simulation_data *sim_data);
+bool					check_death(t_simulation_data *sim_data,
+							t_philosopher *philo);
 
 #endif
