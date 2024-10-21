@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:17 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:56:27 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 13:29:40 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,18 @@ static void	print_status(t_simulation_data *sim_data, int id, char *status)
 
 bool	check_death(t_simulation_data *sim_data, t_philosopher *philo)
 {
+	long long current_time = get_current_time();
+	long long time_since_last_meal = time_diff(philo->last_meal_time, current_time);
+
 	pthread_mutex_lock(&sim_data->death_mutex);
-	if (sim_data->sim_stop || time_diff(philo->last_meal_time,
-			get_current_time()) > sim_data->time_to_die)
+	if (sim_data->sim_stop || time_since_last_meal > sim_data->time_to_die)
 	{
 		if (!sim_data->sim_stop)
 		{
 			sim_data->sim_stop = true;
 			print_status(sim_data, philo->id, "died");
+			printf("Debug: Philosopher %d has died, time since last meal: %lld ms\n", 
+				   philo->id, time_since_last_meal);
 		}
 		pthread_mutex_unlock(&sim_data->death_mutex);
 		return (true);

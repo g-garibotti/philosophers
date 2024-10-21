@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:56:08 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 13:18:00 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,8 @@ typedef struct s_philosopher
 	int								eat_count;
 	long long						last_meal_time;
 	pthread_t						thread;
-	t_simulation_data				*sim_data;
+	struct s_simulation_data		*sim_data;
+	int								thread_joined;
 }									t_philosopher;
 
 typedef struct s_simulation_data
