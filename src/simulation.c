@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 12:33:19 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/21 13:03:21 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,13 @@ void	*death_checker(void *arg)
 	while (!sim_data->sim_stop)
 	{
 		i = 0;
-		while (i < sim_data->num_of_philos)
+		while (i < sim_data->num_of_philos && !sim_data->sim_stop)
 		{
 			if (check_death(sim_data, &sim_data->philosophers[i]))
 				return (NULL);
 			i++;
 		}
-		precise_sleep(1);
+		usleep(100);
 	}
 	return (NULL);
 }
