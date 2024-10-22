@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:56:44 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:00:21 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 15:42:05 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,15 @@
 
 static bool	parse_arguments(t_program *prog, int argc, char **argv)
 {
+	int	i;
+
+	i = 1;
+	while (i < argc)
+	{
+		if (!is_valid_positive_int(argv[i]))
+			return (false);
+		i++;
+	}
 	prog->philo_count = ft_atoi(argv[1]);
 	prog->time_to_die = ft_atoi(argv[2]);
 	prog->time_to_eat = ft_atoi(argv[3]);

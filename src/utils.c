@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:28 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:10:57 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 15:42:46 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ int	ft_atoi(const char *str)
 ** Checks if a string is a valid number
 ** Returns true if string contains only digits (and optional + sign)
 */
-bool	is_number(char *str)
+static bool	is_number(char *str)
 {
 	int	i;
 

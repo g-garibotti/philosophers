@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:33:08 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:33:51 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 15:06:55 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,10 @@ void	check_and_mark_death(t_program *prog, int i)
 	if (time_since_meal >= prog->time_to_die)
 	{
 		prog->someone_died = true;
+		pthread_mutex_lock(&prog->print_mutex); // Add this
 		printf("%lld %d died\n", current_time - prog->start_time,
 			prog->philos[i].id);
+		pthread_mutex_unlock(&prog->print_mutex); // Add this
 	}
 	pthread_mutex_unlock(&prog->death_mutex);
 }
