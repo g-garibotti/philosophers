@@ -6,72 +6,81 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:56:44 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 14:47:00 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:00:21 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philosophers.h"
-#include <stdlib.h>
+#include "philosophers.h"
 
-static bool	init_philosophers(t_simulation_data *sim_data)
+static bool	parse_arguments(t_program *prog, int argc, char **argv)
 {
-	int	i;
-
-	sim_data->philosophers = malloc(sizeof(t_philosopher)
-			* sim_data->num_of_philos);
-	if (!sim_data->philosophers)
+	prog->philo_count = ft_atoi(argv[1]);
+	prog->time_to_die = ft_atoi(argv[2]);
+	prog->time_to_eat = ft_atoi(argv[3]);
+	prog->time_to_sleep = ft_atoi(argv[4]);
+	prog->must_eat_count = -1;
+	if (argc == 6)
+		prog->must_eat_count = ft_atoi(argv[5]);
+	if (prog->philo_count <= 0 || prog->time_to_die <= 0
+		|| prog->time_to_eat <= 0 || prog->time_to_sleep <= 0)
 		return (false);
-	i = -1;
-	while (++i < sim_data->num_of_philos)
-	{
-		sim_data->philosophers[i].id = i + 1;
-		sim_data->philosophers[i].left_fork = i;
-		sim_data->philosophers[i].right_fork = (i + 1)
-			% sim_data->num_of_philos;
-		sim_data->philosophers[i].eat_count = 0;
-		sim_data->philosophers[i].last_meal_time = get_current_time();
-		sim_data->philosophers[i].sim_data = sim_data;
-		sim_data->philosophers[i].thread_created = false;
-	}
+	if (argc == 6 && prog->must_eat_count <= 0)
+		return (false);
 	return (true);
 }
 
-static bool	init_forks(t_simulation_data *sim_data)
+static bool	init_mutexes(t_program *program)
 {
 	int	i;
 
-	sim_data->forks = malloc(sizeof(pthread_mutex_t) * sim_data->num_of_philos);
-	if (!sim_data->forks)
+	program->forks = malloc(sizeof(pthread_mutex_t) * program->philo_count);
+	if (!program->forks)
 		return (false);
-	i = -1;
-	while (++i < sim_data->num_of_philos)
+	i = 0;
+	while (i < program->philo_count)
 	{
-		if (pthread_mutex_init(&sim_data->forks[i], NULL) != 0)
+		if (pthread_mutex_init(&program->forks[i], NULL) != 0)
 			return (false);
+		i++;
 	}
+	if (pthread_mutex_init(&program->death_mutex, NULL) != 0)
+		return (false);
+	if (pthread_mutex_init(&program->print_mutex, NULL) != 0)
+		return (false);
 	return (true);
 }
 
-static bool	init_mutexes(t_simulation_data *sim_data)
+static bool	init_philosophers(t_program *program)
 {
-	if (pthread_mutex_init(&sim_data->death_mutex, NULL) != 0)
+	int	i;
+
+	program->philos = malloc(sizeof(t_philo) * program->philo_count);
+	if (!program->philos)
 		return (false);
-	if (pthread_mutex_init(&sim_data->print_mutex, NULL) != 0)
+	i = 0;
+	while (i < program->philo_count)
 	{
-		pthread_mutex_destroy(&sim_data->death_mutex);
-		return (false);
+		program->philos[i].id = i + 1;
+		program->philos[i].meals_eaten = 0;
+		program->philos[i].last_meal_time = get_time();
+		program->philos[i].prog = program;
+		program->philos[i].left_fork = &program->forks[i];
+		program->philos[i].right_fork = &program->forks[(i + 1)
+			% program->philo_count];
+		i++;
 	}
 	return (true);
 }
 
-bool	init_simulation(t_simulation_data *sim_data)
+bool	init_program(t_program *prog, int argc, char **argv)
 {
-	sim_data->death_checker_created = false;
-	if (!init_philosophers(sim_data))
+	prog->someone_died = false;
+	prog->start_time = get_time();
+	if (!parse_arguments(prog, argc, argv))
 		return (false);
-	if (!init_forks(sim_data))
+	if (!init_mutexes(prog))
 		return (false);
-	if (!init_mutexes(sim_data))
+	if (!init_philosophers(prog))
 		return (false);
 	return (true);
 }

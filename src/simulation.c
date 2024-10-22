@@ -6,120 +6,166 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/21 15:53:20 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:00:28 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philosophers.h"
+#include "philosophers.h"
 
-void	*philosopher_routine(void *arg)
+// Checks if simulation should stop (someone died or all ate enough)
+bool	is_simulation_over(t_program *prog)
 {
-	t_philosopher		*philo;
-	t_simulation_data	*sim_data;
+	bool	should_stop;
+	int		i;
+	int		finished_count;
 
-	philo = (t_philosopher *)arg;
-	sim_data = philo->sim_data;
-	if (sim_data->num_of_philos == 1)
+	pthread_mutex_lock(&prog->death_mutex);
+	should_stop = prog->someone_died;
+	// Check if all philosophers ate enough times
+	if (prog->must_eat_count != -1)
 	{
-		print_status(sim_data, philo->id, "has taken a fork");
-		precise_sleep(sim_data->time_to_die);
-		print_status(sim_data, philo->id, "died");
-		pthread_mutex_lock(&sim_data->death_mutex);
-		sim_data->sim_stop = true;
-		pthread_mutex_unlock(&sim_data->death_mutex);
+		i = 0;
+		finished_count = 0;
+		while (i < prog->philo_count)
+		{
+			if (prog->philos[i].meals_eaten >= prog->must_eat_count)
+				finished_count++;
+			i++;
+		}
+		if (finished_count == prog->philo_count)
+			should_stop = true;
+	}
+	pthread_mutex_unlock(&prog->death_mutex);
+	return (should_stop);
+}
+
+// The main routine each philosopher follows
+static void	*philosopher_routine(void *arg)
+{
+	t_philo	*philo;
+
+	philo = (t_philo *)arg;
+	// If only one philosopher, handle special case
+	if (philo->prog->philo_count == 1)
+	{
+		print_status(philo, "has taken a fork");
+		smart_sleep(philo->prog->time_to_die);
 		return (NULL);
 	}
-	usleep(philo->id * 100);
-	while (!check_death(sim_data))
+	// Even numbered philosophers wait a bit to prevent deadlock
+	if (philo->id % 2 == 0)
+		usleep(1000);
+	while (!is_simulation_over(philo->prog))
 	{
-		if (!philosopher_eat(sim_data, philo))
-			break ;
-		if (check_death(sim_data))
-			break ;
-		philosopher_sleep(sim_data, philo);
-		if (check_death(sim_data))
-			break ;
-		philosopher_think(sim_data, philo);
-		if (sim_data->num_times_to_eat != -1
-			&& philo->eat_count >= sim_data->num_times_to_eat)
-			break ;
+		philosopher_eat(philo);
+		philosopher_sleep(philo);
+		philosopher_think(philo);
 	}
 	return (NULL);
 }
 
-void	*death_checker(void *arg)
+// Handles taking forks and eating
+static bool	philosopher_eat(t_philo *philo)
 {
-	t_simulation_data	*sim_data;
-	int					i;
-	long long			time_since_last_meal;
-	long long			current_time;
+	// Take left fork first
+	pthread_mutex_lock(philo->left_fork);
+	print_status(philo, "has taken a fork");
+	// Take right fork
+	pthread_mutex_lock(philo->right_fork);
+	print_status(philo, "has taken a fork");
+	// Start eating
+	print_status(philo, "is eating");
+	pthread_mutex_lock(&philo->prog->death_mutex);
+	philo->last_meal_time = get_time();
+	philo->meals_eaten++;
+	pthread_mutex_unlock(&philo->prog->death_mutex);
+	// Eat for specified time
+	smart_sleep(philo->prog->time_to_eat);
+	// Put down forks
+	pthread_mutex_unlock(philo->right_fork);
+	pthread_mutex_unlock(philo->left_fork);
+	return (!is_simulation_over(philo->prog));
+}
 
-	sim_data = (t_simulation_data *)arg;
-	while (!check_death(sim_data))
+// Sleeping phase
+static void	philosopher_sleep(t_philo *philo)
+{
+	if (!is_simulation_over(philo->prog))
 	{
-		i = -1;
-		current_time = get_current_time();
-		while (++i < sim_data->num_of_philos)
+		print_status(philo, "is sleeping");
+		smart_sleep(philo->prog->time_to_sleep);
+	}
+}
+
+// Thinking phase
+static void	philosopher_think(t_philo *philo)
+{
+	if (!is_simulation_over(philo->prog))
+		print_status(philo, "is thinking");
+}
+
+// Monitor thread that checks if any philosopher died
+static void	*death_monitor(void *arg)
+{
+	t_program	*prog;
+	int			i;
+	long long	time_since_meal;
+
+	prog = (t_program *)arg;
+	while (!is_simulation_over(prog))
+	{
+		i = 0;
+		while (i < prog->philo_count)
 		{
-			pthread_mutex_lock(&sim_data->death_mutex);
-			time_since_last_meal = time_diff(sim_data->philosophers[i].last_meal_time,
-					current_time);
-			if (time_since_last_meal > sim_data->time_to_die + 1)
-			// Add 1ms buffer
+			pthread_mutex_lock(&prog->death_mutex);
+			time_since_meal = get_time() - prog->philos[i].last_meal_time;
+			if (time_since_meal > prog->time_to_die)
 			{
-				sim_data->sim_stop = true;
-				print_status(sim_data, sim_data->philosophers[i].id, "died");
-				pthread_mutex_unlock(&sim_data->death_mutex);
+				prog->someone_died = true;
+				print_status(&prog->philos[i], "died");
+				pthread_mutex_unlock(&prog->death_mutex);
 				return (NULL);
 			}
-			if (sim_data->num_times_to_eat != -1
-				&& sim_data->philosophers[i].eat_count >= sim_data->num_times_to_eat)
-			{
-				sim_data->finished_eating_count++;
-				if (sim_data->finished_eating_count == sim_data->num_of_philos)
-				{
-					sim_data->sim_stop = true;
-					pthread_mutex_unlock(&sim_data->death_mutex);
-					return (NULL);
-				}
-			}
-			pthread_mutex_unlock(&sim_data->death_mutex);
+			pthread_mutex_unlock(&prog->death_mutex);
+			i++;
 		}
-		usleep(100);
+		usleep(1000);
 	}
 	return (NULL);
 }
 
-bool	start_simulation(t_simulation_data *sim_data)
+// Starts all threads and manages them
+bool	start_simulation(t_program *prog)
 {
-	int	i;
+	pthread_t	*threads;
+	pthread_t	monitor;
+	int			i;
 
-	sim_data->start_time = get_current_time();
-	i = -1;
-	while (++i < sim_data->num_of_philos)
+	threads = malloc(sizeof(pthread_t) * prog->philo_count);
+	if (!threads)
+		return (false);
+	prog->start_time = get_time();
+	// Create philosopher threads
+	i = 0;
+	while (i < prog->philo_count)
 	{
-		sim_data->philosophers[i].last_meal_time = sim_data->start_time;
-		if (pthread_create(&sim_data->philosophers[i].thread, NULL,
-				philosopher_routine, &sim_data->philosophers[i]) != 0)
-		{
-			sim_data->sim_stop = true;
+		if (pthread_create(&threads[i], NULL, philosopher_routine,
+				&prog->philos[i]) != 0)
 			return (false);
-		}
+		i++;
 	}
-	if (sim_data->num_of_philos > 1)
+	// Create monitor thread
+	if (pthread_create(&monitor, NULL, death_monitor, prog) != 0)
+		return (false);
+	// Wait for monitor to finish
+	pthread_join(monitor, NULL);
+	// Wait for all philosophers
+	i = 0;
+	while (i < prog->philo_count)
 	{
-		if (pthread_create(&sim_data->death_checker_thread, NULL, death_checker,
-				sim_data) != 0)
-		{
-			sim_data->sim_stop = true;
-			return (false);
-		}
-		pthread_join(sim_data->death_checker_thread, NULL);
+		pthread_join(threads[i], NULL);
+		i++;
 	}
-	i = -1;
-	while (++i < sim_data->num_of_philos)
-	{
-		pthread_join(sim_data->philosophers[i].thread, NULL);
-	}
+	free(threads);
 	return (true);
 }
