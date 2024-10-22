@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:00:11 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:18:17 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,6 @@ typedef struct s_program
 // Core functions
 bool						init_program(t_program *prog, int argc,
 								char **argv);
-void						cleanup_program(t_program *prog);
 bool						start_simulation(t_program *prog);
 
 // Utils
@@ -61,5 +60,10 @@ void						smart_sleep(long long ms);
 void						print_status(t_philo *philo, char *status);
 bool						is_simulation_over(t_program *prog);
 int							ft_atoi(const char *str);
+
+// Philosopher routines
+bool						philosopher_eat(t_philo *philo);
+void						philosopher_sleep(t_philo *philo);
+void						philosopher_think(t_philo *philo);
 
 #endif

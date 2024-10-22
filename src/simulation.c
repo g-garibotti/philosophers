@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:00:28 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:18:19 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ static void	*philosopher_routine(void *arg)
 }
 
 // Handles taking forks and eating
-static bool	philosopher_eat(t_philo *philo)
+bool	philosopher_eat(t_philo *philo)
 {
 	// Take left fork first
 	pthread_mutex_lock(philo->left_fork);
@@ -88,7 +88,7 @@ static bool	philosopher_eat(t_philo *philo)
 }
 
 // Sleeping phase
-static void	philosopher_sleep(t_philo *philo)
+void	philosopher_sleep(t_philo *philo)
 {
 	if (!is_simulation_over(philo->prog))
 	{
@@ -98,7 +98,7 @@ static void	philosopher_sleep(t_philo *philo)
 }
 
 // Thinking phase
-static void	philosopher_think(t_philo *philo)
+void	philosopher_think(t_philo *philo)
 {
 	if (!is_simulation_over(philo->prog))
 		print_status(philo, "is thinking");
