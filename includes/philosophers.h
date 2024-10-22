@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:18:17 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:35:15 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,5 +65,8 @@ int							ft_atoi(const char *str);
 bool						philosopher_eat(t_philo *philo);
 void						philosopher_sleep(t_philo *philo);
 void						philosopher_think(t_philo *philo);
+void						check_and_mark_death(t_program *prog, int i);
+void						*death_monitor(void *arg);
+void						*philosopher_routine(void *arg);
 
 #endif

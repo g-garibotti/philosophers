@@ -13,6 +13,7 @@ SRCS = src/main.c \
 		src/init.c \
 		src/simulation.c \
 		src/utils.c \
+		src/death_check.c \
 
 OBJS_DIR = objs
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)

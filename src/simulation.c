@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 14:18:19 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/22 14:35:02 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,23 +40,25 @@ bool	is_simulation_over(t_program *prog)
 }
 
 // The main routine each philosopher follows
-static void	*philosopher_routine(void *arg)
+void	*philosopher_routine(void *arg)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	// If only one philosopher, handle special case
 	if (philo->prog->philo_count == 1)
 	{
 		print_status(philo, "has taken a fork");
-		smart_sleep(philo->prog->time_to_die);
+		while (!is_simulation_over(philo->prog))
+			usleep(100);
 		return (NULL);
 	}
-	// Even numbered philosophers wait a bit to prevent deadlock
 	if (philo->id % 2 == 0)
 		usleep(1000);
 	while (!is_simulation_over(philo->prog))
 	{
+		check_and_mark_death(philo->prog, philo->id - 1);
+		if (is_simulation_over(philo->prog))
+			break ;
 		philosopher_eat(philo);
 		philosopher_sleep(philo);
 		philosopher_think(philo);
@@ -67,21 +69,24 @@ static void	*philosopher_routine(void *arg)
 // Handles taking forks and eating
 bool	philosopher_eat(t_philo *philo)
 {
-	// Take left fork first
+	if (is_simulation_over(philo->prog)) // Add check before taking forks
+		return (false);
 	pthread_mutex_lock(philo->left_fork);
 	print_status(philo, "has taken a fork");
-	// Take right fork
+	if (philo->prog->philo_count == 1) // Handle single philosopher case
+	{
+		smart_sleep(philo->prog->time_to_die);
+		pthread_mutex_unlock(philo->left_fork);
+		return (false);
+	}
 	pthread_mutex_lock(philo->right_fork);
 	print_status(philo, "has taken a fork");
-	// Start eating
 	print_status(philo, "is eating");
 	pthread_mutex_lock(&philo->prog->death_mutex);
 	philo->last_meal_time = get_time();
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->prog->death_mutex);
-	// Eat for specified time
 	smart_sleep(philo->prog->time_to_eat);
-	// Put down forks
 	pthread_mutex_unlock(philo->right_fork);
 	pthread_mutex_unlock(philo->left_fork);
 	return (!is_simulation_over(philo->prog));
@@ -102,36 +107,6 @@ void	philosopher_think(t_philo *philo)
 {
 	if (!is_simulation_over(philo->prog))
 		print_status(philo, "is thinking");
-}
-
-// Monitor thread that checks if any philosopher died
-static void	*death_monitor(void *arg)
-{
-	t_program	*prog;
-	int			i;
-	long long	time_since_meal;
-
-	prog = (t_program *)arg;
-	while (!is_simulation_over(prog))
-	{
-		i = 0;
-		while (i < prog->philo_count)
-		{
-			pthread_mutex_lock(&prog->death_mutex);
-			time_since_meal = get_time() - prog->philos[i].last_meal_time;
-			if (time_since_meal > prog->time_to_die)
-			{
-				prog->someone_died = true;
-				print_status(&prog->philos[i], "died");
-				pthread_mutex_unlock(&prog->death_mutex);
-				return (NULL);
-			}
-			pthread_mutex_unlock(&prog->death_mutex);
-			i++;
-		}
-		usleep(1000);
-	}
-	return (NULL);
 }
 
 // Starts all threads and manages them
