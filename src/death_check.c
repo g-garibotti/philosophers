@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:33:08 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 16:10:32 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:39:08 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,23 +23,30 @@ void	check_and_mark_death(t_program *prog, int i)
 {
 	long long	current_time;
 	long long	time_since_meal;
+	bool		should_print;
 
 	current_time = get_time();
+	should_print = false;
+	// Always take death_mutex first
 	pthread_mutex_lock(&prog->death_mutex);
-	// Don't check for death if philosopher has finished eating
 	if (!has_philosopher_finished_eating(prog, i))
 	{
 		time_since_meal = current_time - prog->philos[i].last_meal_time;
-		if (time_since_meal >= prog->time_to_die)
+		if (time_since_meal >= prog->time_to_die && !prog->someone_died)
 		{
 			prog->someone_died = true;
-			pthread_mutex_lock(&prog->print_mutex);
-			printf("%lld %d died\n", current_time - prog->start_time,
-				prog->philos[i].id);
-			pthread_mutex_unlock(&prog->print_mutex);
+			should_print = true;
 		}
 	}
 	pthread_mutex_unlock(&prog->death_mutex);
+	// Print after releasing death_mutex if needed
+	if (should_print)
+	{
+		pthread_mutex_lock(&prog->print_mutex);
+		printf("%lld %d died\n", current_time - prog->start_time,
+			prog->philos[i].id);
+		pthread_mutex_unlock(&prog->print_mutex);
+	}
 }
 
 void	*death_monitor(void *arg)

@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 15:03:25 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:30:54 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,17 +69,25 @@ void	*philosopher_routine(void *arg)
 // Handles taking forks and eating
 bool	philosopher_eat(t_philo *philo)
 {
-	if (is_simulation_over(philo->prog)) // Add check before taking forks
-		return (false);
-	pthread_mutex_lock(philo->left_fork);
-	print_status(philo, "has taken a fork");
-	if (philo->prog->philo_count == 1) // Handle single philosopher case
+	pthread_mutex_t	*first_fork;
+	pthread_mutex_t	*second_fork;
+
+	// Always take the lower numbered fork first
+	if (philo->left_fork < philo->right_fork)
 	{
-		smart_sleep(philo->prog->time_to_die);
-		pthread_mutex_unlock(philo->left_fork);
-		return (false);
+		first_fork = philo->left_fork;
+		second_fork = philo->right_fork;
 	}
-	pthread_mutex_lock(philo->right_fork);
+	else
+	{
+		first_fork = philo->right_fork;
+		second_fork = philo->left_fork;
+	}
+	if (is_simulation_over(philo->prog))
+		return (false);
+	pthread_mutex_lock(first_fork);
+	print_status(philo, "has taken a fork");
+	pthread_mutex_lock(second_fork);
 	print_status(philo, "has taken a fork");
 	print_status(philo, "is eating");
 	pthread_mutex_lock(&philo->prog->death_mutex);
@@ -87,8 +95,8 @@ bool	philosopher_eat(t_philo *philo)
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->prog->death_mutex);
 	smart_sleep(philo->prog->time_to_eat);
-	pthread_mutex_unlock(philo->right_fork);
-	pthread_mutex_unlock(philo->left_fork);
+	pthread_mutex_unlock(second_fork);
+	pthread_mutex_unlock(first_fork);
 	return (!is_simulation_over(philo->prog));
 }
 
