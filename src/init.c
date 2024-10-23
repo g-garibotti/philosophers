@@ -6,11 +6,34 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 10:56:44 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 15:42:05 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:58:58 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
+
+static int	ft_atoi(const char *str)
+{
+	int	result;
+	int	sign;
+
+	result = 0;
+	sign = 1;
+	while ((*str >= 9 && *str <= 13) || *str == 32)
+		str++;
+	if (*str == '+' || *str == '-')
+	{
+		if (*str == '-')
+			sign = -1;
+		str++;
+	}
+	while (*str >= '0' && *str <= '9')
+	{
+		result = result * 10 + (*str - '0');
+		str++;
+	}
+	return (sign * result);
+}
 
 static bool	parse_arguments(t_program *prog, int argc, char **argv)
 {

@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/17 22:24:16 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 15:45:38 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:59:12 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,6 @@ bool						start_simulation(t_program *prog);
 long long					get_time(void);
 void						smart_sleep(long long ms);
 void						print_status(t_philo *philo, char *status);
-int							ft_atoi(const char *str);
 bool						is_valid_positive_int(char *str);
 
 bool						is_simulation_over(t_program *prog);
