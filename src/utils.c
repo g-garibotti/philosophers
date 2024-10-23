@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:12:28 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/22 15:42:46 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 16:43:07 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,14 +54,19 @@ void	smart_sleep(long long ms)
 void	print_status(t_philo *philo, char *status)
 {
 	long long	timestamp;
+	bool		should_print;
 
-	pthread_mutex_lock(&philo->prog->print_mutex);
-	if (!is_simulation_over(philo->prog))
-	{
+	pthread_mutex_lock(&philo->prog->death_mutex);
+	should_print = !philo->prog->someone_died;
+	if (should_print)
 		timestamp = get_time() - philo->prog->start_time;
+	pthread_mutex_unlock(&philo->prog->death_mutex);
+	if (should_print)
+	{
+		pthread_mutex_lock(&philo->prog->print_mutex);
 		printf("%lld %d %s\n", timestamp, philo->id, status);
+		pthread_mutex_unlock(&philo->prog->print_mutex);
 	}
-	pthread_mutex_unlock(&philo->prog->print_mutex);
 }
 
 /*
