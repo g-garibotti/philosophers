@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:33:08 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/23 17:10:59 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/23 17:13:58 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,36 +51,48 @@ void	check_and_mark_death(t_program *prog, int i)
 	pthread_mutex_unlock(&prog->death_mutex);
 }
 
+static bool	check_initial_conditions(t_program *prog)
+{
+	bool	should_stop;
+
+	pthread_mutex_lock(&prog->death_mutex);
+	should_stop = prog->someone_died;
+	if (!should_stop && prog->must_eat_count != -1)
+		should_stop = check_if_all_ate_enough(prog);
+	pthread_mutex_unlock(&prog->death_mutex);
+	return (should_stop);
+}
+
+static bool	check_death_occurred(t_program *prog)
+{
+	pthread_mutex_lock(&prog->death_mutex);
+	if (prog->someone_died)
+	{
+		pthread_mutex_unlock(&prog->death_mutex);
+		return (true);
+	}
+	pthread_mutex_unlock(&prog->death_mutex);
+	return (false);
+}
+
 void	*death_monitor(void *arg)
 {
 	t_program	*prog;
 	int			i;
-	bool		should_stop;
 
 	prog = (t_program *)arg;
 	while (1)
 	{
 		i = 0;
-		pthread_mutex_lock(&prog->death_mutex);
-		should_stop = prog->someone_died;
-		if (!should_stop && prog->must_eat_count != -1)
-			should_stop = check_if_all_ate_enough(prog);
-		pthread_mutex_unlock(&prog->death_mutex);
-		if (should_stop)
+		if (check_initial_conditions(prog))
 			return (NULL);
 		while (i < prog->philo_count)
 		{
 			check_and_mark_death(prog, i);
-			pthread_mutex_lock(&prog->death_mutex);
-			if (prog->someone_died)
-			{
-				pthread_mutex_unlock(&prog->death_mutex);
+			if (check_death_occurred(prog))
 				return (NULL);
-			}
-			pthread_mutex_unlock(&prog->death_mutex);
 			i++;
 		}
 		usleep(100);
 	}
-	return (NULL);
 }

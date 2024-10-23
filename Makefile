@@ -14,6 +14,7 @@ SRCS = src/main.c \
 		src/simulation.c \
 		src/utils.c \
 		src/death_check.c \
+		src/simulation_actions.c \
 
 OBJS_DIR = objs
 OBJS = $(SRCS:%.c=$(OBJS_DIR)/%.o)
