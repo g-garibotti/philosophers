@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:02:35 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/23 17:05:48 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/24 17:19:38 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ bool	philosopher_eat(t_philo *philo)
 
 	first = philo->left_fork;
 	second = philo->right_fork;
+	// Deterministic fork-taking order to prevent deadlock
 	if (philo->right_fork < philo->left_fork)
 	{
 		first = philo->right_fork;
@@ -30,12 +31,15 @@ bool	philosopher_eat(t_philo *philo)
 	print_status(philo, "has taken a fork");
 	pthread_mutex_lock(second);
 	print_status(philo, "has taken a fork");
-	print_status(philo, "is eating");
+	// Update last meal time immediately when both forks are acquired
 	pthread_mutex_lock(&philo->prog->death_mutex);
 	philo->last_meal_time = get_time();
+	pthread_mutex_unlock(&philo->prog->death_mutex);
+	print_status(philo, "is eating");
+	smart_sleep(philo->prog->time_to_eat);
+	pthread_mutex_lock(&philo->prog->death_mutex);
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->prog->death_mutex);
-	smart_sleep(philo->prog->time_to_eat);
 	pthread_mutex_unlock(second);
 	pthread_mutex_unlock(first);
 	return (!is_simulation_over(philo->prog));

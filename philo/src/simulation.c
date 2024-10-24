@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/10/23 17:03:33 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/10/24 17:19:25 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,16 +49,21 @@ void	*philosopher_routine(void *arg)
 			usleep(100);
 		return (NULL);
 	}
+	// Better initial delay strategy
 	if (philo->id % 2 == 0)
-		usleep(1000);
+		usleep(philo->prog->time_to_eat / 2);
 	while (!is_simulation_over(philo->prog))
 	{
+		// Check death before trying to eat
 		check_and_mark_death(philo->prog, philo->id - 1);
 		if (is_simulation_over(philo->prog))
 			break ;
 		philosopher_eat(philo);
 		philosopher_sleep(philo);
 		philosopher_think(philo);
+		// Add small delay based on philosopher number for odd count
+		if (philo->prog->philo_count % 2 == 1)
+			usleep(100 * philo->id);
 	}
 	return (NULL);
 }
