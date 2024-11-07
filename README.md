@@ -1,7 +1,6 @@
 # Philosophers
 
 ![C](https://img.shields.io/badge/language-C-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 A solution to the classic dining philosophers problem using threads and mutexes.
 
@@ -120,11 +119,3 @@ Parameters:
 - Minimized critical sections
 - Efficient resource allocation/deallocation
 - Smart sleeping to reduce CPU usage
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
