@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/23 17:02:35 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/11/06 15:13:24 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/11/07 10:20:47 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,25 +19,25 @@ bool	philosopher_eat(t_philo *philo)
 
 	if (is_simulation_over(philo->prog))
 		return (false);
-	first = philo->left_fork;
-	second = philo->right_fork;
-	if (philo->right_fork < philo->left_fork)
+	if (philo->id % 2 == 0)
 	{
 		first = philo->right_fork;
 		second = philo->left_fork;
 	}
-	pthread_mutex_lock(first);
-	print_status(philo, "has taken a fork");
-	pthread_mutex_lock(second);
-	print_status(philo, "has taken a fork");
+	else
+	{
+		first = philo->left_fork;
+		second = philo->right_fork;
+	}
+	(pthread_mutex_lock(first), print_status(philo, "has taken a fork"));
+	(pthread_mutex_lock(second), print_status(philo, "has taken a fork"));
+	print_status(philo, "is eating");
 	pthread_mutex_lock(&philo->prog->death_mutex);
 	philo->last_meal_time = get_time();
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->prog->death_mutex);
-	print_status(philo, "is eating");
 	smart_sleep(philo->prog->time_to_eat);
-	pthread_mutex_unlock(second);
-	pthread_mutex_unlock(first);
+	(pthread_mutex_unlock(second), pthread_mutex_unlock(first));
 	return (true);
 }
 

@@ -6,41 +6,47 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/11/06 15:12:56 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/11/07 10:45:52 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-static bool check_all_ate_enough(t_program *prog)
+static bool	check_all_ate_enough(t_program *prog)
 {
-    int i;
-    bool all_done;
+	int		i;
+	bool	all_done;
 
-    if (prog->must_eat_count == -1)
-        return (false);
-    i = 0;
-    all_done = true;
-    while (i < prog->philo_count)
-    {
-        if (prog->philos[i].meals_eaten < prog->must_eat_count)
-        {
-            all_done = false;
-            break;
-        }
-        i++;
-    }
-    return (all_done);
+	if (prog->must_eat_count == -1)
+		return (false);
+	pthread_mutex_lock(&prog->death_mutex);
+	i = 0;
+	all_done = true;
+	while (i < prog->philo_count)
+	{
+		if (prog->philos[i].meals_eaten < prog->must_eat_count)
+		{
+			all_done = false;
+			break ;
+		}
+		i++;
+	}
+	pthread_mutex_unlock(&prog->death_mutex);
+	return (all_done);
 }
 
-bool is_simulation_over(t_program *prog)
+bool	is_simulation_over(t_program *prog)
 {
-    bool should_stop;
+	bool	should_stop;
+	bool	someone_died;
 
-    pthread_mutex_lock(&prog->death_mutex);
-    should_stop = prog->someone_died || check_all_ate_enough(prog);
-    pthread_mutex_unlock(&prog->death_mutex);
-    return (should_stop);
+	pthread_mutex_lock(&prog->death_mutex);
+	someone_died = prog->someone_died;
+	pthread_mutex_unlock(&prog->death_mutex);
+	should_stop = someone_died;
+	if (!should_stop)
+		should_stop = check_all_ate_enough(prog);
+	return (should_stop);
 }
 
 void	*philosopher_routine(void *arg)
@@ -56,7 +62,7 @@ void	*philosopher_routine(void *arg)
 		return (NULL);
 	}
 	if (philo->id % 2 == 0)
-		usleep(philo->prog->time_to_eat / 2);
+		smart_sleep(philo->prog->time_to_eat / 2);
 	while (!is_simulation_over(philo->prog))
 	{
 		check_and_mark_death(philo->prog, philo->id - 1);
@@ -66,7 +72,7 @@ void	*philosopher_routine(void *arg)
 		philosopher_sleep(philo);
 		philosopher_think(philo);
 		if (philo->prog->philo_count % 2 == 1)
-			usleep(100 * philo->id);
+			smart_sleep(50);
 	}
 	return (NULL);
 }
@@ -88,6 +94,7 @@ bool	start_simulation(t_program *prog)
 				&prog->philos[i]) != 0)
 			return (false);
 		i++;
+		smart_sleep(1);
 	}
 	if (pthread_create(&monitor, NULL, death_monitor, prog) != 0)
 		return (false);
