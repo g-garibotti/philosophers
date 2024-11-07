@@ -6,7 +6,7 @@
 /*   By: ggaribot <ggaribot@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/21 12:28:15 by ggaribot          #+#    #+#             */
-/*   Updated: 2024/11/07 10:45:52 by ggaribot         ###   ########.fr       */
+/*   Updated: 2024/11/07 13:08:50 by ggaribot         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,8 @@ void	*philosopher_routine(void *arg)
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
+	pthread_mutex_lock(&philo->prog->print_mutex);
+	pthread_mutex_unlock(&philo->prog->print_mutex);
 	if (philo->prog->philo_count == 1)
 	{
 		print_status(philo, "has taken a fork");
@@ -88,6 +90,7 @@ bool	start_simulation(t_program *prog)
 		return (false);
 	prog->start_time = get_time();
 	i = 0;
+	pthread_mutex_lock(&prog->print_mutex);
 	while (i < prog->philo_count)
 	{
 		if (pthread_create(&threads[i], NULL, philosopher_routine,
@@ -96,6 +99,7 @@ bool	start_simulation(t_program *prog)
 		i++;
 		smart_sleep(1);
 	}
+	pthread_mutex_unlock(&prog->print_mutex);
 	if (pthread_create(&monitor, NULL, death_monitor, prog) != 0)
 		return (false);
 	pthread_join(monitor, NULL);
